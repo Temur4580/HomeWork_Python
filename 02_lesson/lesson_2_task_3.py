@@ -1,13 +1,25 @@
 import math
 
+
 def square(side):
+    """
+    Вычисляет площадь квадрата.
+    Если результат не целое число, округляется вверх.
+    """
+    # Вычисляем площадь
     area = side * side
-    if isinstance(side, int):
-        return area
+
+    # Проверяем, целое ли число площадь (не сторона!)
+    if area == int(area):
+        # Если площадь целая - возвращаем как целое число
+        return int(area)
     else:
+        # Если площадь дробная - округляем вверх
         return math.ceil(area)
 
+
+# Тестируем
 print("Результаты:")
-print("square(5) =", square(5))
-print("square(3.5) =", square(3.5))
-print("square(4) =", square(4))
+print("square(5) =", square(5))  # 5*5=25 → целое → 25
+print("square(3.5) =", square(3.5))  # 3.5*3.5=12.25 → дробное → ceil(12.25)=13
+print("square(4) =", square(4))  # 4*4=16 → целое → 16
