@@ -1,102 +1,66 @@
-import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
-from webdriver_manager.firefox import GeckoDriverManager
-import time
+import pytest
 
 
-class TestSauceDemo:
+def test_saucedemo_total():
+    """Тест проверки итоговой суммы в корзине SauceDemo"""
 
-    def setup_method(self):
-        print("\n🔵 Запуск Firefox...")
-        options = Options()
-        options.add_argument("--start-maximized")
+    # Инициализация драйвера Firefox
+    driver = webdriver.Firefox()
+    driver.maximize_window()
+    driver.implicitly_wait(5)
+    wait = WebDriverWait(driver, 10)
 
-        # Явно указываем путь к Firefox (измените если нужно)
-        options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
+    try:
+        # Шаг 1: Открыть сайт
+        driver.get("https://www.saucedemo.com/")
 
-        # Устанавливаем драйвер
-        service = Service(GeckoDriverManager().install())
-        self.driver = webdriver.Firefox(service=service, options=options)
+        # Шаг 2: Авторизация
+        driver.find_element(By.ID, "user-name").send_keys("standard_user")
+        driver.find_element(By.ID, "password").send_keys("secret_sauce")
+        driver.find_element(By.ID, "login-button").click()
 
-        # Увеличиваем таймауты
-        self.driver.set_page_load_timeout(30)
-        self.wait = WebDriverWait(self.driver, 15)
+        # Ожидание загрузки страницы товаров
+        wait.until(EC.url_contains("inventory.html"))
 
-        print("🟡 Открытие сайта...")
-        self.driver.get("https://www.saucedemo.com/")
-        print("🟢 Сайт загружен!")
-        time.sleep(1)  # Небольшая пауза для гарантии
+        # Шаг 3: Добавление товаров в корзину
+        driver.find_element(By.ID, "add-to-cart-sauce-labs-backpack").click()
+        driver.find_element(By.ID, "add-to-cart-sauce-labs-bolt-t-shirt").click()
+        driver.find_element(By.ID, "add-to-cart-sauce-labs-onesie").click()
 
-    def teardown_method(self):
-        if self.driver:
-            self.driver.quit()
-            print("🔴 Браузер закрыт")
+        # Шаг 4: Переход в корзину
+        driver.find_element(By.CLASS_NAME, "shopping_cart_link").click()
+        wait.until(EC.url_contains("cart.html"))
 
-    def test_purchase(self):
-        # Авторизация
-        username = self.wait.until(
-            EC.presence_of_element_located((By.ID, "user-name"))
-        )
-        username.send_keys("standard_user")
-        print("✅ Логин введен")
+        # Шаг 5: Нажать Checkout
+        driver.find_element(By.ID, "checkout").click()
 
-        self.driver.find_element(By.ID, "password").send_keys("secret_sauce")
-        print("✅ Пароль введен")
+        # Шаг 6: Заполнить форму
+        driver.find_element(By.ID, "first-name").send_keys("Иван")
+        driver.find_element(By.ID, "last-name").send_keys("Петров")
+        driver.find_element(By.ID, "postal-code").send_keys("123456")
 
-        self.driver.find_element(By.ID, "login-button").click()
-        print("✅ Кнопка нажата")
+        # Шаг 7: Нажать Continue
+        driver.find_element(By.ID, "continue").click()
 
-        # Проверка что перешли на страницу товаров
-        self.wait.until(
-            EC.presence_of_element_located((By.CLASS_NAME, "inventory_list"))
-        )
-        print("✅ Страница товаров загружена")
+        # Шаг 8: Получить итоговую сумму
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "summary_total_label")))
+        total_text = driver.find_element(By.CLASS_NAME, "summary_total_label").text
+        total_value = total_text.replace("Total: $", "").strip()
 
-        # Добавление товаров
-        self.driver.find_element(By.ID, "add-to-cart-sauce-labs-backpack").click()
-        print("✅ Backpack добавлен")
-        self.driver.find_element(By.ID, "add-to-cart-sauce-labs-bolt-t-shirt").click()
-        print("✅ T-Shirt добавлен")
-        self.driver.find_element(By.ID, "add-to-cart-sauce-labs-onesie").click()
-        print("✅ Onesie добавлен")
+        # Шаг 9: Проверка итоговой суммы
+        expected_total = "58.29"
+        assert total_value == expected_total, f"Ожидалась сумма ${expected_total}, получена ${total_value}"
 
-        # Корзина
-        self.driver.find_element(By.CLASS_NAME, "shopping_cart_link").click()
-        print("✅ Корзина открыта")
+        print(f"\n✓ Итоговая сумма: ${total_value} - тест пройден!")
 
-        # Checkout
-        checkout = self.wait.until(
-            EC.element_to_be_clickable((By.ID, "checkout"))
-        )
-        checkout.click()
-        print("✅ Checkout нажат")
-
-        # Данные покупателя
-        self.wait.until(
-            EC.presence_of_element_located((By.ID, "first-name"))
-        ).send_keys("Иван")
-        self.driver.find_element(By.ID, "last-name").send_keys("Петров")
-        self.driver.find_element(By.ID, "postal-code").send_keys("123456")
-        print("✅ Данные заполнены")
-
-        # Continue
-        self.driver.find_element(By.ID, "continue").click()
-        print("✅ Continue нажат")
-
-        # Проверка суммы
-        total = self.wait.until(
-            EC.presence_of_element_located((By.CLASS_NAME, "summary_total_label"))
-        ).text
-        print(f"💰 Итоговая сумма: {total}")
-
-        assert total == "Total: $58.29", f"Ожидалось $58.29, получено {total}"
-        print("✅ ТЕСТ ПРОЙДЕН!")
+    finally:
+        # Шаг 10: Закрытие браузера
+        driver.quit()
 
 
 if __name__ == "__main__":
-    pytest.main(["-v", "-s", __file__])
+    pytest.main(["-v", __file__])
