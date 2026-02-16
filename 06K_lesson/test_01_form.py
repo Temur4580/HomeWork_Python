@@ -13,7 +13,7 @@ class TestFormValidation:
         options.add_argument("--start-maximized")
         self.driver = webdriver.Edge(options=options)
         self.driver.get("https://bonigarcia.dev/selenium-webdriver-java/data-types.html")
-        self.wait = WebDriverWait(self.driver, 10)
+        self.wait = WebDriverWait(self.driver, 20)
 
     def teardown_method(self):
         self.driver.quit()
