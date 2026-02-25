@@ -1,5 +1,14 @@
 import pytest
+import sys
+import os
+
+# Добавляем путь к родительской папке task2_shop, чтобы найти pages
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from pages.login_page import LoginPage
+from pages.inventory_page import InventoryPage
+from pages.cart_page import CartPage
+from pages.checkout_page import CheckoutPage
 
 
 class TestShop:
@@ -42,12 +51,12 @@ class TestShop:
 
         # Получение итоговой суммы
         total_text = checkout_page.get_total_amount()
-        print(f"\nИтоговая сумма: {total_text}")  # Для отладки
+        print(f"\nИтоговая сумма: {total_text}")
 
         # Проверка итоговой суммы
         expected_total = "Total: $58.29"
         assert total_text == expected_total, \
             f"Ожидалась сумма {expected_total}, получено {total_text}"
 
-        # Завершение заказа (опционально)
+        # Завершение заказа
         checkout_page.click_finish()
