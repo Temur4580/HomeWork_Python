@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from database import DATABASE_URL
 from models import Base, Student, Subject
 
+
 @pytest.fixture
 def engine():
     """Создает движок базы данных"""
@@ -11,6 +12,7 @@ def engine():
     Base.metadata.create_all(bind=test_engine)
     yield test_engine
     Base.metadata.drop_all(bind=test_engine)
+
 
 @pytest.fixture
 def db_session(engine):
@@ -20,6 +22,7 @@ def db_session(engine):
     yield session
     session.rollback()
     session.close()
+
 
 @pytest.fixture
 def sample_student(db_session):
@@ -32,6 +35,7 @@ def sample_student(db_session):
     db_session.add(student)
     db_session.commit()
     return student
+
 
 @pytest.fixture
 def sample_subject(db_session):

@@ -10,8 +10,12 @@ DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-print(f"Подключаюсь к: {DATABASE_URL}")
+DATABASE_URL = (
+    f"postgresql://{DB_USER}:{DB_PASSWORD}@"
+    f"{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+safe_url = DATABASE_URL.replace(DB_PASSWORD, '******')
+print(f"Подключаюсь к: {safe_url}")
 
 try:
     engine = create_engine(DATABASE_URL)

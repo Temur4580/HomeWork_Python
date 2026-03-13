@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 import datetime
 
 Base = declarative_base()
+
 
 class Student(Base):
     """Модель студента"""
@@ -14,7 +14,12 @@ class Student(Base):
     last_name = Column(String(50), nullable=False)
     email = Column(String(100), unique=True, nullable=False, index=True)
     birth_date = Column(Date, nullable=True)
-    enrollment_year = Column(Integer, nullable=False, default=datetime.datetime.now().year)
+    enrollment_year = Column(
+        Integer,
+        nullable=False,
+        default=datetime.datetime.now().year
+    )
+
 
 class Subject(Base):
     """Модель учебного предмета"""
