@@ -13,7 +13,6 @@ class CheckoutPage(BasePage):
     LAST_NAME = (By.ID, "last-name")
     POSTAL_CODE = (By.ID, "postal-code")
     CONTINUE_BUTTON = (By.ID, "continue")
-    FINISH_BUTTON = (By.ID, "finish")
     SUCCESS_MESSAGE = (By.CLASS_NAME, "complete-header")
 
     @allure.step("Заполнить информацию")
@@ -24,20 +23,16 @@ class CheckoutPage(BasePage):
         self.input_text(self.POSTAL_CODE, postal_code)
         return self
 
+    @allure.step("Продолжить оформление")
     def continue_checkout(self) -> 'CheckoutPage':
-        """Продолжить оформление"""
+        """Нажать кнопку Continue"""
         self.click(self.CONTINUE_BUTTON)
-        return self
-
-    def finish_checkout(self) -> 'CheckoutPage':
-        """Завершить оформление"""
-        self.click(self.FINISH_BUTTON)
         return self
 
     def is_checkout_complete(self) -> bool:
         """Проверить, что заказ оформлен"""
         try:
-            self.find_element(self.SUCCESS_MESSAGE)
+            self.find_element(self.SUCCESS_MESSAGE, timeout=5)
             return True
         except:
             return False
