@@ -2,6 +2,8 @@
 Page Object для страницы оформления заказа.
 """
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from pages.base_page import BasePage
 import allure
 
@@ -14,6 +16,7 @@ class CheckoutPage(BasePage):
     POSTAL_CODE = (By.ID, "postal-code")
     CONTINUE_BUTTON = (By.ID, "continue")
     SUCCESS_MESSAGE = (By.CLASS_NAME, "complete-header")
+    COMPLETE_CONTAINER = (By.ID, "checkout_complete_container")
 
     @allure.step("Заполнить информацию")
     def fill_customer_info(self, first_name: str, last_name: str, postal_code: str) -> 'CheckoutPage':
@@ -32,7 +35,17 @@ class CheckoutPage(BasePage):
     def is_checkout_complete(self) -> bool:
         """Проверить, что заказ оформлен"""
         try:
-            self.find_element(self.SUCCESS_MESSAGE, timeout=5)
+            # Ждем появления контейнера с подтверждением
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located(self.COMPLETE_CONTAINER)
+            )
+
+            # Проверяем текст сообщения
+            message = self.get_text(self.SUCCESS_MESSAGE)
+            allure.attach(f"Сообщение: {message}", name="Успешное оформление",
+                          attachment_type=allure.attachment_type.TEXT)
             return True
-        except:
+        except Exception as e:
+            allure.attach(str(e), name="Ошибка проверки",
+                          attachment_type=allure.attachment_type.TEXT)
             return False

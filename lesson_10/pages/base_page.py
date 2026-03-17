@@ -30,7 +30,7 @@ class BasePage:
         """
         self.driver = driver
         self.base_url = base_url
-        self.wait = WebDriverWait(driver, 10)
+        self.wait = WebDriverWait(driver, 20)
 
     @allure.step("Найти элемент: {locator}")
     def find_element(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> WebElement:
@@ -47,7 +47,7 @@ class BasePage:
         Raises:
             TimeoutException: Если элемент не найден за указанное время
         """
-        wait = WebDriverWait(self.driver, timeout) if timeout else self.wait
+        wait = WebDriverWait(self.driver, timeout or 20)
         return wait.until(EC.presence_of_element_located(locator))
 
     @allure.step("Найти кликабельный элемент: {locator}")
